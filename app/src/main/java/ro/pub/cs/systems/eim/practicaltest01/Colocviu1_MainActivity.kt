@@ -1,15 +1,20 @@
 package ro.pub.cs.systems.eim.practicaltest01
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 
 class Colocviu1_MainActivity : AppCompatActivity() {
 
     // Counters for each button
     private var countButton1 = 0
     private var countButton2 = 0
+
+    companion object {
+        const val REQUEST_CODE = 1
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,6 +25,7 @@ class Colocviu1_MainActivity : AppCompatActivity() {
         val textView2: TextView = findViewById(R.id.textView2)
         val button1: Button = findViewById(R.id.button1)
         val button2: Button = findViewById(R.id.button2)
+        val navigateButton: Button = findViewById(R.id.navigate_button)
 
         // Restore state if available
         if (savedInstanceState != null) {
@@ -31,31 +37,47 @@ class Colocviu1_MainActivity : AppCompatActivity() {
 
         // Set up listeners for each button
         button1.setOnClickListener {
-            countButton1++ // Increment count for Button 1
-            textView1.text = countButton1.toString() // Update TextView1 with the new count
+            countButton1++
+            textView1.text = countButton1.toString()
         }
 
         button2.setOnClickListener {
-            countButton2++ // Increment count for Button 2
-            textView2.text = countButton2.toString() // Update TextView2 with the new count
+            countButton2++
+            textView2.text = countButton2.toString()
+        }
+
+        // Navigate to the secondary activity
+        navigateButton.setOnClickListener {
+            val intent = Intent(this, Colocviu1_SecondActivity::class.java)
+            intent.putExtra("text", "Navigated from Main Activity")
+            intent.putExtra("count", countButton1 + countButton2)
+            startActivityForResult(intent, REQUEST_CODE)
         }
     }
 
-    // Save the current state (counters) before rotation
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("countButton1", countButton1)
         outState.putInt("countButton2", countButton2)
     }
 
-    // Restore the saved state after rotation
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         countButton1 = savedInstanceState.getInt("countButton1", 0)
         countButton2 = savedInstanceState.getInt("countButton2", 0)
-
-        // Update the TextViews with the restored values
         findViewById<TextView>(R.id.textView1).text = countButton1.toString()
         findViewById<TextView>(R.id.textView2).text = countButton2.toString()
+    }
+
+    // Override onActivityResult to reset counters if Cancel was pressed
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_CANCELED) {
+            // Reset counters
+            countButton1 = 0
+            countButton2 = 0
+            findViewById<TextView>(R.id.textView1).text = countButton1.toString()
+            findViewById<TextView>(R.id.textView2).text = countButton2.toString()
+        }
     }
 }
